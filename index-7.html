@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pangeya Listening Tests</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg: #f9fafb;
+      --panel: #fff;
+      --accent: #3562db;
+      --border: #e0e4ea;
+      --input: #f3f5fa;
+      --radius: 10px;
+      --text: #182033;
+      --muted: #667a93;
+    }
+    [data-theme="dark"] {
+      --bg: #15181e;
+      --panel: #1e232b;
+      --accent: #6ca1ff;
+      --border: #232738;
+      --input: #19202b;
+      --text: #eee;
+      --muted: #93a6c1;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, Arial, sans-serif;
+      font-size: 17px;
+      line-height: 1.55;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: var(--panel);
+      box-shadow: 0 2px 8px rgba(37, 50, 73, 0.06);
+      padding: 1.5rem 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    header h1 {
+      font-size: 1.45rem;
+      margin: 0;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.03em;
+    }
+    header .mode-switch {
+      margin-left: auto;
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+    }
+    header .theme-switch {
+      margin-right: 1rem;
+    }
+    button, select, input, textarea {
+      font: inherit;
+      border-radius: var(--radius);
+      border: none;
+      outline: none;
+    }
+    button {
+      background: var(--accent);
+      color: #fff;
+      padding: 0.5em 1.1em;
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(63,90,169, 0.07);
+      border-radius: var(--radius);
+      cursor: pointer;
+      border: none;
+      transition: background 0.1s;
+    }
+    button:active {
+      background: #2d57bf;
+    }
+    .main-panel {
+      display: flex;
+      flex: 1;
+      align-items: stretch;
+      gap: 2.5rem;
+      justify-content: center;
+      margin: 0 auto;
+      max-width: 950px;
+      width: 99vw;
+    }
+    .panel {
+      background: var(--panel);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 24px rgba(34,50,81,0.07);
+      margin: 1.2em 0;
+      flex: 1 1 330px;
+      min-width: 0;
+      padding: 2em 1.2em;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+    @media (max-width: 850px) {
+      .main-panel {
+        flex-direction: column;
+        gap: 1rem;
+        max-width: 100vw;
+        padding: 0 1vw;
+      }
+      .panel { margin: 0.4em 0; padding: 1.2em 0.9em;}
+      header { flex-direction: column; gap: 0.45rem;}
+      header .mode-switch, header .theme-switch { margin: 0;}
+    }
+    .panel h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.65em;
+      margin-top: 0;
+      color: var(--accent);
+    }
+    .status {
+      font-size: 0.95em;
+      margin-bottom: 1em;
+      color: var(--muted);
+    }
+    .student-controls {
+      margin-bottom: 1.2em;
+      display: flex;
+      align-items: center;
+      gap: 0.7em;
+      flex-wrap: wrap;
+    }
+    select, input[type="text"], input[type="file"] {
+      padding: 0.3em 0.7em;
+      background: var(--input);
+      border: 1px solid var(--border);
+      color: var(--text);
+      min-width: 100px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 48px;
+      background: var(--input);
+      color: var(--text);
+      border: 1px solid var(--border);
+      margin-bottom: 0.18em;
+      font-size: 1em;
+      resize: vertical;
+    }
+    .answer-input {
+      width: 70%;
+      padding: 0.15em 0.65em;
+      font-size: 1em;
+      margin-bottom: 0.38em;
+      background: var(--input);
+      border: 1px solid var(--border);
+      color: var(--text);
+      display: inline-block;
+    }
+    .question-editor-group {
+      margin-bottom: 1.1em;
+      background: var(--input);
+      border-radius: 7px;
+      padding: 0.7em 0.7em 0.38em 0.7em;
+      border: 1px solid var(--border);
+    }
+    .question-editor-group .qnum {
+      font-weight: 700;
+      margin-bottom: 0.5em;
+      color: var(--muted);
+      font-size: 0.98em;
+    }
+    .filled { background: #fae5c4;}
+    .warn { color: #c44141; font-weight: 600;}
+    /* Minimal audio controls styling */
+    .audio-player {
+      margin-bottom: 1em;
+    }
+    .question-list, .answer-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: 1em;
+    }
+    .question-list li {
+      padding: 0.5em 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .answer-list {
+      margin-bottom: 1.2em;
+      font-size: 0.97em;
+    }
+    .answer-list li {
+      padding: 0.3em 0.2em;
+      margin-bottom: 0.05em;
+    }
+    /* File import & PDF parser */
+    .pdf-controls {
+      margin-bottom: 0.7em;
+      display: flex;
+      align-items: center;
+      gap: 1em;
+      flex-wrap: wrap;
+    }
+    .pdf-instructions {
+      font-size: 0.98em;
+      color: var(--muted);
+      margin-bottom: 0.3em;
+    }
+    /* Error styling */
+    .error-msg {
+      color: #e81d3d;
+      background: #fff0f2;
+      padding: 0.7em 1em;
+      border: 1px solid #e81d3d2b;
+      border-radius: 8px;
+      margin-bottom: 1em;
+      font-size: 0.97em;
+    }
+    /* Misc */
+    .mt1 { margin-top: 1em;}
+    .mb08 { margin-bottom: 0.8em;}
+    .mb12 { margin-bottom: 1.2em;}
+    .msmall { font-size: 0.93em; color: var(--muted);}
+    .space { margin-right: 0.8em;}
+    .success {
+      color: #129e3e;
+      background: #ecf7ed;
+      padding: 0.3em 0.6em;
+      border-radius: 6px;
+      margin-bottom: 0.4em;
+      font-size: 0.97em;
+      display: inline-block;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.3em 0;
+    }
+    /* Responsive fix */
+    @media (max-width: 500px) {
+      .main-panel { padding: 0;}
+      .panel { padding: 1em 0.2em;}
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+<header>
+  <h1>Pangeya Listening Tests</h1>
+  <div class="theme-switch">
+    Theme:  
+    <select id="theme-select">
+      <option value="light">☀️ Light</option>
+      <option value="dark">🌑 Dark</option>
+    </select>
+  </div>
+  <div class="mode-switch">
+    Mode: 
+    <select id="mode-select">
+      <option value="student">Student</option>
+      <option value="teacher">Teacher</option>
+    </select>
+  </div>
+</header>
+<div class="main-panel">
+  <!-- Student Panel -->
+  <section id="student-panel" class="panel">
+    <h2>Student</h2>
+    <div class="student-controls mb12">
+      <select id="test-select"></select>
+      <button id="refresh-tests-btn" type="button" title="Reload tests">&#x21bb;</button>
+    </div>
+    <div id="student-test-title" class="mb08"></div>
+    <div id="audio-player-wrap" class="audio-player"></div>
+    <ul id="student-question-list" class="question-list"></ul>
+    <button id="clear-answers-btn" style="margin-top:1em;">Clear Answers</button>
+  </section>
+  <!-- Teacher Panel -->
+  <section id="teacher-panel" class="panel" style="display:none;">
+    <h2>Teacher</h2>
+    <div id="teacher-status" class="status"></div>
+
+    <div id="test-meta-edit">
+      <label>
+        Test title:<br>
+        <input type="text" id="test-title-input" style="width:95%; margin-bottom:0.7em;">
+      </label><br>
+      <label>
+        Audio URL or file:<br>
+        <input type="text" id="audio-url-input" placeholder="https://...mp3" style="width:60%;">
+        <input type="file" id="audio-file-input" accept="audio/*" style="margin-top:0.6em;">
+      </label>
+    </div>
+
+    <hr>
+    <!-- Question parsing / editing -->
+    <label class="msmall">Paste questions (or add manually).</label>
+    <textarea id="question-detect-input" rows="6" placeholder="Paste questions each on a line, with [BLANK]"></textarea>
+    <div>
+      <button id="detect-questions-btn">Detect Questions</button>
+      <button id="add-question-btn">Add Manual Question</button>
+    </div>
+    <div id="question-detect-msg" class="status"></div>
+    <hr>
+    <!-- PDF answer key import -->
+    <div class="pdf-controls">
+      <span class="pdf-instructions">Parse answer key PDF:</span>
+      <input type="file" id="answer-key-file" accept="application/pdf">
+      <button id="parse-answer-key-btn" type="button">Parse answer key</button>
+    </div>
+    <div id="pdf-error-msg" class="error-msg" style="display:none;"></div>
+    <div id="pdf-status-msg" class="status"></div>
+    <hr>
+    <!-- Question editor -->
+    <div id="question-editor-list"></div>
+    <hr>
+    <button id="save-test-btn" style="width:130px;margin-bottom:0.6em;">Save / Update Test</button>
+    <button id="clear-tests-btn" style="background:#e33939;width:130px;">Clear all Tests</button><br>
+    <span class="msmall mt1">All tests and answers are stored locally in your browser.</span>
+  </section>
+</div>
+<script>
+/** --- Data & State --- **/
+const STORAGE_KEY = "pangeya-listening-tests-v1";
+const THEME_KEY = "pangeya-theme";
+const MODE_KEY = "pangeya-mode";
+let tests = [];
+let selectedTestIdx = 0;
+let currentQuestions = []; // {number, text, answer}
+
+// --- Theme / Mode ---
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem(THEME_KEY, theme);
+}
+function applyMode(mode) {
+  document.getElementById('student-panel').style.display = mode === 'student' ? "" : "none";
+  document.getElementById('teacher-panel').style.display = mode === 'teacher' ? "" : "none";
+  localStorage.setItem(MODE_KEY, mode);
+}
+// --- Load / Save Tests ---
+function loadTestsFromStorage() {
+  const json = localStorage.getItem(STORAGE_KEY);
+  tests = [];
+  if (json) {
+    try {
+      tests = JSON.parse(json);
+      if (!Array.isArray(tests)) tests = [];
+    } catch(e) { tests = [];}
+  }
+}
+function saveTestsToStorage() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tests));
+}
+// --- Test Select ---
+function populateTestSelect() {
+  const sel = document.getElementById("test-select");
+  sel.innerHTML = tests.map((t,i) => `<option value="${i}">${t.title || "Untitled"}</option>`).join("");
+}
+function selectTest(idx) {
+  selectedTestIdx = idx;
+  const test = tests[idx];
+  // Student view
+  document.getElementById("student-test-title").textContent = test ? test.title || "" : "";
+  // Audio
+  const wrap = document.getElementById("audio-player-wrap");
+  wrap.innerHTML = '';
+  if (test && test.audioUrl) {
+    const audio =
+      `<audio controls preload="none" style="width:70%;">
+        <source src="${test.audioUrl}">
+        Your browser does not support audio.
+      </audio>`;
+    wrap.innerHTML = audio;
+  }
+  // Questions
+  renderStudentQuestions(test);
+}
+function renderStudentQuestions(test) {
+  const ul = document.getElementById("student-question-list");
+  ul.innerHTML = '';
+  if (!test) return;
+  test.questions.forEach(q =>
+    ul.innerHTML += `<li><b>Q${q.number}:</b> ${q.text.replace('[BLANK]', '<input type="text" data-qnum="'+q.number+'" class="answer-input" placeholder="Your answer">')}</li>`
+  );
+  // fill saved answers
+  const storedAnswers = JSON.parse(localStorage.getItem("pangeya-answers-"+test.id) || '{}');
+  for (const num in storedAnswers) {
+    const inp = ul.querySelector(`input[data-qnum="${num}"]`);
+    if (inp) inp.value = storedAnswers[num];
+  }
+  // input event
+  ul.querySelectorAll('input.answer-input').forEach(inp => {
+    inp.oninput = () => {
+      storedAnswers[inp.dataset.qnum] = inp.value;
+      localStorage.setItem("pangeya-answers-"+test.id, JSON.stringify(storedAnswers));
+    };
+  });
+}
+document.getElementById("clear-answers-btn").onclick = function() {
+  const test = tests[selectedTestIdx];
+  if (!test) return;
+  localStorage.removeItem("pangeya-answers-"+test.id);
+  renderStudentQuestions(test);
+};
+// --- Student Controls ---
+document.getElementById("test-select").onchange = function() {
+  selectTest(Number(this.value));
+};
+document.getElementById("refresh-tests-btn").onclick = function() {
+  loadTestsFromStorage();
+  populateTestSelect();
+  selectTest(selectedTestIdx);
+};
+// --- Theme/Mode Switches ---
+document.getElementById("theme-select").onchange = function() {
+  applyTheme(this.value);
+};
+document.getElementById("mode-select").onchange = function() {
+  applyMode(this.value);
+};
+// --- On Load ---
+(function () {
+  // Theme
+  let theme = localStorage.getItem(THEME_KEY) || "light";
+  applyTheme(theme);
+  document.getElementById("theme-select").value = theme;
+  // Mode
+  let mode = localStorage.getItem(MODE_KEY) || "student";
+  applyMode(mode);
+  document.getElementById("mode-select").value = mode;
+  // Tests
+  loadTestsFromStorage();
+  populateTestSelect();
+  if (tests.length) selectTest(0);
+})();
+
+/** --- Teacher Panel --- **/
+function showTeacherStatus(msg, type="status") {
+  document.getElementById('teacher-status').textContent = msg;
+  document.getElementById('teacher-status').className = type;
+}
+/** --- 1. Detect/Parse Questions --- **/
+function parseQuestionsFromText(text, addToExisting=false) {
+  // Each line is a question, number optional, must contain [BLANK]
+  let lines = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  let parsed = [];
+  let num = 1;
+  lines.forEach((line) => {
+    if (!line.includes("[BLANK]")) return;
+    let match = /^(\d+)\s*[\.:-]?\s*(.*)$/i.exec(line);
+    let qnum = match && match[1] ? Number(match[1]) : num++;
+    let qtext = match ? match[2] : line;
+    parsed.push({ number: qnum, text: qtext, answer: "" });
+  });
+  // Remove duplicates (by text, ignoring case and whitespace)
+  const seen = new Set();
+  const deduped = [];
+  for (const q of parsed) {
+    const key = q.text.replace(/\s+/g,'').toLowerCase();
+    if (!seen.has(key)) { deduped.push(q); seen.add(key);}
+  }
+  if (addToExisting) {
+    // Append only those not in currentQuestions
+    for (const q of deduped) {
+      if (!currentQuestions.some(cq => cq.number === q.number && cq.text === q.text))
+        currentQuestions.push(q);
+    }
+  } else {
+    currentQuestions = deduped;
+  }
+  showTeacherStatus(`Detected ${currentQuestions.length} questions.`);
+  renderQuestionEditor();
+}
+document.getElementById("detect-questions-btn").onclick = function() {
+  const txt = document.getElementById('question-detect-input').value;
+  if (!txt.trim()) {
+    showTeacherStatus('Please paste questions text.', "warn");
+    return;
+  }
+  parseQuestionsFromText(txt);
+};
+/** Manual add **/
+document.getElementById("add-question-btn").onclick = function() {
+  let num = currentQuestions.length ? currentQuestions[currentQuestions.length-1].number+1 : 1;
+  currentQuestions.push({number:num, text:"[BLANK]", answer:""});
+  showTeacherStatus(`Added new manual question.`);
+  renderQuestionEditor();
+};
+/** --- 4. Parse Answer Key PDF --- **/
+document.getElementById('parse-answer-key-btn').onclick = async function() {
+  const file = document.getElementById('answer-key-file').files[0];
+  const errorMsg = document.getElementById('pdf-error-msg');
+  errorMsg.style.display = "none";
+  let pdfStatus = document.getElementById("pdf-status-msg");
+  pdfStatus.textContent = "";
+  if (!file) {
+    errorMsg.textContent = "Please select a PDF file."; errorMsg.style.display=''; return;
+  }
+  try {
+    // pdf.js load
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+    let allText = '';
+    for (let i = 1; i <= pdf.numPages; ++i) {
+      let page = await pdf.getPage(i);
+      let content = await page.getTextContent();
+      allText += content.items.map(it => it.str).join('\n') + '\n';
+    }
+    // Extract lines like "1 museum"
+    let answerLines = allText.split(/\r?\n/).filter(l => /^\d+\s+\S+/.test(l.trim()));
+    let filled = 0;
+    answerLines.forEach(line => {
+      let m = /^(\d+)\s+([^\s].*)$/i.exec(line.trim());
+      if (!m) return;
+      let num = Number(m[1]), ans = m[2].trim();
+      for (const q of currentQuestions) {
+        if (q.number === num && !q.answer) { q.answer = ans; filled++; }
+      }
+    });
+    pdfStatus.textContent = `Parsed PDF. Filled ${filled} answers automatically.`;
+    renderQuestionEditor();
+  } catch(e) {
+    errorMsg.textContent = "PDF parsing failed: " + (e.message || e); errorMsg.style.display='';
+  }
+};
+/** --- 5. Question Editor --- **/
+function renderQuestionEditor() {
+  const wrap = document.getElementById('question-editor-list');
+  wrap.innerHTML = '';
+  if (!currentQuestions.length) wrap.innerHTML = '<span class="warn">No questions detected. Paste question text containing [BLANK] 💡</span>';
+  currentQuestions.forEach((q,i) =>{
+    const g = document.createElement('div');
+    g.className = 'question-editor-group';
+    g.innerHTML = `<div class="qnum">Q${q.number}</div>
+      <textarea data-idx="${i}">${q.text}</textarea><br>
+      <input type="text" data-idx="${i}" class="answer-input" placeholder="Correct answer" value="${q.answer}">
+    `;
+    wrap.appendChild(g);
+  });
+  // textarea event
+  wrap.querySelectorAll('textarea').forEach(area=>{
+    area.oninput = function() {
+      currentQuestions[area.dataset.idx].text = area.value;
+    };
+  });
+  // answer event
+  wrap.querySelectorAll('input.answer-input').forEach(inp=>{
+    inp.oninput = function() {
+      currentQuestions[inp.dataset.idx].answer = inp.value;
+    };
+  });
+}
+// --- Edit meta
+document.getElementById('test-title-input').oninput = function() {
+  showTeacherStatus('');
+};
+document.getElementById('audio-file-input').addEventListener('change', async function(){
+  const f = this.files[0]; if (!f) return;
+  const reader = new FileReader();
+  reader.onload = e => { document.getElementById('audio-url-input').value = e.target.result; };
+  reader.readAsDataURL(f);
+});
+
+/** --- 6. Saving Tests --- **/
+document.getElementById('save-test-btn').onclick = function() {
+  const title = document.getElementById('test-title-input').value.trim();
+  const audioUrl = document.getElementById('audio-url-input').value.trim();
+  if (!title) {
+    showTeacherStatus("Test title must not be empty.", "warn"); return;
+  }
+  if (!currentQuestions.length) {
+    showTeacherStatus("Must have at least one question.", "warn"); return;
+  }
+  let existingIdx = tests.findIndex(t => t.title === title);
+  let obj = {
+    id: existingIdx >= 0 ? tests[existingIdx].id : (Date.now()+"-"+Math.random()).slice(0,14),
+    title,
+    audioUrl,
+    questions: currentQuestions.map(q=>({number:q.number, text:q.text, answer:q.answer}))
+  };
+  if (existingIdx >= 0) {
+    tests[existingIdx] = obj;
+    showTeacherStatus('Test updated.');
+  } else {
+    tests.push(obj);
+    showTeacherStatus('Test saved.');
+  }
+  saveTestsToStorage();
+  populateTestSelect();
+  selectTest(tests.findIndex(t => t.title === title));
+};
+document.getElementById('clear-tests-btn').onclick = function() {
+  if (!confirm("Are you sure you want to clear all tests?")) return;
+  tests = [];
+  currentQuestions = [];
+  saveTestsToStorage();
+  populateTestSelect();
+  selectTest(0);
+  document.getElementById('question-editor-list').innerHTML = '';
+  showTeacherStatus('Cleared all tests.');
+};
+
+/** --- Populate Teacher panel on test select --- **/
+function fillTeacherEditorForTest(idx) {
+  let t = tests[idx];
+  if (!t) { document.getElementById('test-title-input').value=""; document.getElementById('audio-url-input').value=""; currentQuestions=[]; renderQuestionEditor(); return;}
+  document.getElementById('test-title-input').value = t.title || "";
+  document.getElementById('audio-url-input').value = t.audioUrl || "";
+  currentQuestions = JSON.parse(JSON.stringify(t.questions || []));
+  renderQuestionEditor();
+}
+document.getElementById('test-select').addEventListener('change', function(){
+  if (document.getElementById('mode-select').value==='teacher') fillTeacherEditorForTest(Number(this.value));
+});
+// If switched into teacher mode, fill
+document.getElementById('mode-select').addEventListener('change', function(){
+  if (this.value==='teacher') fillTeacherEditorForTest(selectedTestIdx);
+});
+</script>
+</body>
+</html>
