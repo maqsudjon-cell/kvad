@@ -185,13 +185,13 @@
         }
         
         /* Glassmorphism effect */
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.25) !important;
+        h1.glass-effect {
+            background: rgba(255, 255, 255, 0.25);
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            border: 1px solid rgba(255, 255, 255, 0.3);
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37),
-                        inset 0 0 20px rgba(255, 255, 255, 0.1) !important;
+                        inset 0 0 20px rgba(255, 255, 255, 0.1);
         }
         
         /* Snowflake animation */
@@ -300,6 +300,17 @@
         let christmasMode = false;
         let glassMode = false;
         let snowInterval = null;
+        let headlineWidth = 0;
+        
+        // Cache headline width and update on resize
+        function updateHeadlineWidth() {
+            const h1 = document.querySelector('h1');
+            if (h1) {
+                headlineWidth = h1.offsetWidth;
+            }
+        }
+        
+        window.addEventListener('resize', updateHeadlineWidth);
         
         // Toggle Christmas mode
         function toggleChristmas() {
@@ -336,9 +347,10 @@
         // Start snow animation
         function startSnow() {
             const h1 = document.querySelector('h1');
+            updateHeadlineWidth();
             snowInterval = setInterval(() => {
                 createSnowflake(h1);
-            }, 100);
+            }, 150);
         }
         
         // Stop snow animation
@@ -357,9 +369,8 @@
             snowflake.className = 'snowflake';
             snowflake.innerHTML = '❄';
             
-            // Random horizontal position within container
-            const containerWidth = container.offsetWidth;
-            snowflake.style.left = Math.random() * containerWidth + 'px';
+            // Use cached width instead of reading offsetWidth
+            snowflake.style.left = Math.random() * headlineWidth + 'px';
             
             // Random animation duration (2-4 seconds) - faster
             const duration = Math.random() * 2 + 2;
@@ -374,10 +385,10 @@
             
             container.appendChild(snowflake);
             
-            // Remove snowflake after animation completes
-            setTimeout(() => {
+            // Use animationend event for cleanup
+            snowflake.addEventListener('animationend', () => {
                 snowflake.remove();
-            }, (duration + 1) * 1000);
+            });
         }
         
         // Add Christmas stickers
