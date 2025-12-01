@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pangeya Essay Platform – New Year Edition</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!--
+    This file is based on the original Pangeya Essay Platform hosted on GitHub pages.
+    The markup, styling and scripts have been preserved so the core functionality
+    (writing, saving, editing and printing essays; teacher mode; theme switching)
+    continue to work.  In addition to the existing Neon, Light and Dark themes,
+    this edition introduces a Glass mode reminiscent of iOS‑style frosted panels.
+    A New Year mode can also be toggled on/off.  When active it adds 3D
+    decorations (stocking by the name field, tree/gift/Santa icons on the buttons
+    and essay cards) and a gentle snowfall effect near the top of the page.  A
+    small fixed button in the bottom‑right corner allows users to enable or
+    disable the New Year mode without interfering with normal operation or
+    teacher features.
+  -->
+  <style>
+    :root {
+      /* base colours and sizing inherited from the original site */
+      --bg-gradient: radial-gradient(circle at top left, #3b0764, #1e1b4b 40%, #020617 80%);
+      --card-bg: rgba(15, 23, 42, 0.92);
+      --accent: #a855f7;
+      --accent2: #ec4899;
+      --accent3: #22c55e;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border-soft: rgba(148, 163, 184, 0.3);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    /* Light and dark themes mirror the original implementation */
+    .light-theme {
+      --bg-gradient: linear-gradient(135deg, #e0e7ff, #f5f3ff);
+      --card-bg: #ffffff;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --border-soft: rgba(148, 163, 184, 0.5);
+    }
+    .dark-theme {
+      --bg-gradient: radial-gradient(circle at top, #020617, #020617 40%, #000000 100%);
+      --card-bg: #020617;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+    }
+    /* Glass theme – inspired by iOS 17/18 style glass surfaces.
+       It uses translucent backgrounds and applies a backdrop blur on the
+       container to give the impression of frosted glass. */
+    .glass-theme {
+      --bg-gradient: linear-gradient(135deg, rgba(255,255,255,0.35), rgba(230,230,230,0.2));
+      --card-bg: rgba(255, 255, 255, 0.2);
+      --text-main: #0f172a;
+      --text-muted: #334155;
+      --border-soft: rgba(15, 23, 42, 0.25);
+    }
+    .glass-theme .inner {
+      backdrop-filter: blur(16px);
+    }
+    /* Container styling preserved from original */
+    .container {
+      width: 100%;
+      max-width: 900px;
+      background: linear-gradient(145deg, rgba(88, 28, 135, 0.9), rgba(30, 64, 175, 0.9));
+      padding: 2px;
+      border-radius: 26px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
+    }
+    .inner {
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 20px 20px 18px;
+    }
+    @media (min-width: 768px) {
+      .inner { padding: 24px 26px 22px; }
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+    .theme-switcher {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .theme-btn {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all .18s ease;
+    }
+    .theme-btn.active {
+      background: linear-gradient(135deg, #a855f7, #ec4899);
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(168, 85, 247, 0.4);
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 4px;
+      margin-top: 6px;
+    }
+    /* Input and textarea styling retained from original */
+    input[type="text"], textarea {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid var(--border-soft);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-main);
+      padding: 10px 12px;
+      font-size: 14px;
+      outline: none;
+      transition: border .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+    textarea {
+      min-height: 130px;
+      resize: vertical;
+    }
+    input[type="text"]:focus, textarea:focus {
+      border-color: #818cf8;
+      box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.7);
+      background: rgba(15, 23, 42, 1);
+    }
+    .btn {
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      padding: 11px 14px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: transform .1s ease, box-shadow .1s ease, opacity .15s ease;
+      color: white;
+      position: relative; /* to anchor stickers */
+      overflow: hidden;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #a855f7, #ec4899);
+      box-shadow: 0 10px 25px rgba(236, 72, 153, 0.4);
+    }
+    .btn-secondary {
+      background: linear-gradient(135deg, #38bdf8, #6366f1);
+      box-shadow: 0 8px 20px rgba(56, 189, 248, 0.35);
+    }
+    .btn-teacher {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      box-shadow: 0 8px 20px rgba(34, 197, 94, 0.35);
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); box-shadow: none; }
+    .teacher-panel {
+      display: none;
+      margin-top: 8px;
+    }
+    .teacher-panel input { margin-top: 6px; }
+    .teacher-panel .btn-enter { margin-top: 8px; }
+    .section-title {
+      margin-top: 18px;
+      margin-bottom: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .section-title span.icon { font-size: 17px; }
+    .essays-list {
+      margin-top: 4px;
+      max-height: 380px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+    .essay-card {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 18px;
+      padding: 10px 12px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      margin-bottom: 8px;
+      font-size: 13px;
+      position: relative; /* for sticker positioning */
+    }
+    .essay-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 4px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .essay-name { font-weight: 500; }
+    .essay-text {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      overflow-wrap: anywhere;
+      margin-bottom: 6px;
+      margin-top: 2px;
+      color: var(--text-main);
+    }
+    .word-count { /* inserted from script */ }
+    .feedback {
+      margin-top: 4px;
+      padding: 7px 8px;
+      background: rgba(22, 163, 74, 0.16);
+      border-left: 3px solid #22c55e;
+      border-radius: 10px;
+      font-size: 13px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .feedback .fb-check, .feedback .fb-cross {
+      display: block;
+      padding-left: 22px;
+      position: relative;
+      margin: 4px 0;
+    }
+    .feedback .fb-check::before {
+      content: '✔';
+      position: absolute;
+      left: 0;
+      color: #22c55e;
+    }
+    .feedback .fb-cross::before {
+      content: '✘';
+      position: absolute;
+      left: 0;
+      color: #ef4444;
+    }
+    .essay-actions {
+      margin-top: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .chip-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 5px 11px;
+      font-size: 11px;
+      cursor: pointer;
+      color: white;
+    }
+    .chip-edit { background: #22c55e; }
+    .chip-delete { background: #ef4444; }
+    .chip-feedback { background: #0ea5e9; }
+    .chip-btn:active { transform: translateY(1px); }
+    /* Toolbar styling for rich text editing */
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .icon-btn {
+      background: transparent;
+      border: 1px solid var(--border-soft);
+      border-radius: 4px;
+      padding: 4px 6px;
+      font-size: 13px;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+    .icon-btn:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+    .edit-area {
+      min-height: 120px;
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 8px;
+      border: 1px solid var(--border-soft);
+      border-radius: 6px;
+      font-size: 13px;
+      background: var(--card-bg);
+      color: var(--text-main);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      outline: none;
+    }
+    .feedback-essay {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 8px;
+      padding: 8px;
+      border: 1px solid var(--border-soft);
+      border-radius: 6px;
+      font-size: 12px;
+      background: var(--card-bg);
+      color: var(--text-main);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    /* Light theme adjustments for cards and feedback */
+    .light-theme .essay-card {
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(0, 0, 0, 0.12);
+    }
+    .light-theme .essay-card .essay-text,
+    .light-theme .essay-card .feedback {
+      color: #111827;
+    }
+    .light-theme .feedback {
+      background: rgba(34, 197, 94, 0.16);
+      border-left: 3px solid #16a34a;
+    }
+    .light-theme .edit-area,
+    .light-theme .feedback-essay {
+      background: #f9fafb;
+      color: #111827;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+    }
+    .light-theme .icon-btn {
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      color: #111827;
+    }
+    .light-theme input[type="text"],
+    .light-theme textarea {
+      background: #f9fafb;
+      color: #111827;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+    }
+    .light-theme input[type="text"]::placeholder,
+    .light-theme textarea::placeholder {
+      color: #6b7280;
+    }
+    .light-theme input[type="text"]:focus,
+    .light-theme textarea:focus {
+      background: #ffffff;
+      border-color: #818cf8;
+      box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.7);
+    }
+    .light-theme .modal-content {
+      background: #ffffff;
+      color: #111827;
+    }
+    .light-theme #editArea,
+    .light-theme #feedbackArea {
+      background: #f9fafb;
+      color: #111827;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+    }
+    .light-theme #editArea:focus,
+    .light-theme #feedbackArea:focus {
+      background: #ffffff;
+      border-color: #818cf8;
+    }
+    /* Highlight, underline and strike styling */
+    mark, .user-highlight { background-color: #fef08a; color: #111827; }
+    u, .underline-text { text-decoration: underline; }
+    s, .strike-text { text-decoration: line-through; }
+    /* Modal styling retained */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      z-index: 999;
+    }
+    .modal-content {
+      width: 100%;
+      max-width: 720px;
+      background: #020617;
+      color: #e5e7eb;
+      border-radius: 18px;
+      padding: 16px 16px 14px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+    }
+    .modal-content h3 {
+      margin-bottom: 8px;
+      font-size: 16px;
+      font-weight: 500;
+    }
+    #editArea, #feedbackArea {
+      width: 100%;
+      min-height: 200px;
+      max-height: 60vh;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 14px;
+      resize: vertical;
+      outline: none;
+    }
+    #editArea:focus, #feedbackArea:focus {
+      border-color: #818cf8;
+      box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.7);
+    }
+    .modal-actions {
+      margin-top: 10px;
+      display: flex;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .small-btn {
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: none;
+      font-size: 12px;
+      cursor: pointer;
+      color: white;
+    }
+    .small-save { background: #22c55e; }
+    .small-cancel { background: #ef4444; }
+    @media (max-width: 480px) {
+      h1 { font-size: 18px; }
+      .subtitle { font-size: 11px; }
+      .essay-card { font-size: 12px; }
+      .modal-content { padding: 14px; }
+      #editArea, #feedbackArea { min-height: 170px; }
+    }
+    /* ================== New Year decorations ================== */
+    /* Wrapper around the name input so the stocking can be positioned nicely */
+    .name-wrapper { position: relative; }
+    .ny-icon {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 28px;
+      display: none;
+      pointer-events: none;
+    }
+    /* Show icons when New Year mode is on */
+    body.newyear-mode .ny-icon { display: block; }
+    /* Add extra padding to the input when the icon is visible */
+    body.newyear-mode .name-wrapper input[type="text"] { padding-right: 45px; }
+    /* Button stickers are absolutely positioned inside each button */
+    .btn .btn-sticker {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 32px;
+      height: 32px;
+      display: none;
+      pointer-events: none;
+    }
+    body.newyear-mode .btn .btn-sticker { display: block; }
+    /* Essay card sticker appears at bottom‑right corner */
+    .essay-card .card-sticker {
+      position: absolute;
+      bottom: -8px;
+      right: -8px;
+      width: 28px;
+      height: 28px;
+      display: none;
+      pointer-events: none;
+    }
+    body.newyear-mode .essay-card .card-sticker { display: block; }
+    /* Snow container spans only the header region; pointer‑events none ensures typing is unaffected */
+    .snow-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 160px;
+      overflow: hidden;
+      pointer-events: none;
+      display: none;
+      z-index: 1;
+    }
+    body.newyear-mode .snow-container { display: block; }
+    .snowflake {
+      position: absolute;
+      top: -10px;
+      color: #ffffff;
+      opacity: 0.9;
+      user-select: none;
+      will-change: transform;
+    }
+    /* Define individual flakes with varying animation durations, delays and sizes */
+    @keyframes fall {
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(180px) rotate(360deg); }
+    }
+    .snowflake:nth-child(1) { left: 5%; font-size: 12px; animation: fall 7s linear infinite; animation-delay: 0s; }
+    .snowflake:nth-child(2) { left: 15%; font-size: 16px; animation: fall 10s linear infinite; animation-delay: 2s; }
+    .snowflake:nth-child(3) { left: 25%; font-size: 10px; animation: fall 8s linear infinite; animation-delay: 4s; }
+    .snowflake:nth-child(4) { left: 35%; font-size: 14px; animation: fall 9s linear infinite; animation-delay: 1s; }
+    .snowflake:nth-child(5) { left: 45%; font-size: 13px; animation: fall 6s linear infinite; animation-delay: 3s; }
+    .snowflake:nth-child(6) { left: 55%; font-size: 11px; animation: fall 8s linear infinite; animation-delay: 5s; }
+    .snowflake:nth-child(7) { left: 65%; font-size: 15px; animation: fall 10s linear infinite; animation-delay: 0.5s; }
+    .snowflake:nth-child(8) { left: 75%; font-size: 12px; animation: fall 7s linear infinite; animation-delay: 2.5s; }
+    .snowflake:nth-child(9) { left: 85%; font-size: 14px; animation: fall 9s linear infinite; animation-delay: 1.5s; }
+    .snowflake:nth-child(10) { left: 95%; font-size: 11px; animation: fall 8s linear infinite; animation-delay: 3.5s; }
+    /* Toggle button for New Year mode */
+    #nyToggle {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: none;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1000;
+      background: var(--accent3);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    #nyToggle.active {
+      background: linear-gradient(135deg, #fb923c, #facc15);
+      color: #111827;
+    }
+  </style>
+</head>
+<body class="neon-theme">
+  <div class="container">
+    <div class="inner">
+      <h1>✨ Pangeya Essay Platform</h1>
+      <div class="subtitle">Write, save and print essays. Teachers can leave feedback with a secret key.</div>
+      <!-- Snow effect overlay (falls within header area) -->
+      <div class="snow-container" aria-hidden="true">
+        <div class="snowflake">❆</div>
+        <div class="snowflake">❅</div>
+        <div class="snowflake">❆</div>
+        <div class="snowflake">❄</div>
+        <div class="snowflake">❅</div>
+        <div class="snowflake">❆</div>
+        <div class="snowflake">❅</div>
+        <div class="snowflake">❄</div>
+        <div class="snowflake">❆</div>
+        <div class="snowflake">❅</div>
+      </div>
+      <!-- Theme switcher: Neon, Light, Dark and the new Glass -->
+      <div class="theme-switcher">
+        <button class="theme-btn active" id="neonTheme">Neon</button>
+        <button class="theme-btn" id="lightTheme">Light</button>
+        <button class="theme-btn" id="darkTheme">Dark</button>
+        <button class="theme-btn" id="glassTheme">Glass</button>
+      </div>
+      <!-- Name input wrapped so the stocking can sit inside -->
+      <label for="name">Your name</label>
+      <div class="name-wrapper">
+        <input id="name" type="text" placeholder="Enter your name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <img src="assets/sock.png" alt="Christmas stocking" class="ny-icon ny-sock">
+      </div>
+      <!-- Essay textarea -->
+      <label for="essay">Write your essay</label>
+      <textarea id="essay" placeholder="Write your essay..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+      <!-- Primary actions with New Year stickers (tree, gift, Santa) -->
+      <button class="btn btn-primary" id="submitBtn">Submit
+        <img src="assets/tree.png" alt="Christmas tree" class="btn-sticker">
+      </button>
+      <button class="btn btn-secondary" id="pdfBtn">Download PDF
+        <img src="assets/gift.png" alt="Gift" class="btn-sticker">
+      </button>
+      <button class="btn btn-teacher" id="teacherToggle">Teacher Login
+        <img src="assets/santa.png" alt="Santa" class="btn-sticker">
+      </button>
+      <!-- Hidden teacher panel revealed when logging in -->
+      <div class="teacher-panel" id="teacherPanel">
+        <input id="teacherKey" type="text" placeholder="Enter teacher key" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <button class="btn btn-teacher btn-enter" id="teacherEnter">Enter</button>
+      </div>
+      <!-- Essays list heading -->
+      <div class="section-title">
+        <span class="icon">📚</span>
+        <span>All Essays</span>
+      </div>
+      <div class="essays-list" id="essaysList"></div>
+    </div>
+  </div>
+  <!-- New Year toggle button (snowflake icon) -->
+  <button id="nyToggle" title="Toggle New Year mode">❄️</button>
+  <!-- Edit Essay Modal -->
+  <div class="modal" id="editModal">
+    <div class="modal-content">
+      <h3>Edit essay</h3>
+      <!-- toolbar for text formatting -->
+      <div class="toolbar">
+        <button class="icon-btn" title="Highlight Text" onclick="highlightSelection()">🖍</button>
+        <button class="icon-btn" title="Underline Text" onclick="underlineSelection()"><u>U</u></button>
+        <button class="icon-btn" title="Strikethrough Text" onclick="strikeSelection()"><s>S</s></button>
+      </div>
+      <div id="editArea" class="edit-area" contenteditable="true" spellcheck="false" autocorrect="off" autocapitalize="off"></div>
+      <div class="modal-actions">
+        <button class="small-btn small-save" onclick="saveEdit()">Save</button>
+        <button class="small-btn small-cancel" onclick="closeEditModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <!-- Feedback Modal -->
+  <div class="modal" id="feedbackModal">
+    <div class="modal-content">
+      <h3>Add / edit teacher feedback</h3>
+      <div id="feedbackEssay" class="feedback-essay" contenteditable="true" spellcheck="false" autocorrect="off" autocapitalize="off"></div>
+      <div class="toolbar">
+        <button class="icon-btn" title="Highlight Text" onclick="highlightSelection()">🖍</button>
+        <button class="icon-btn" title="Underline Text" onclick="underlineSelection()"><u>U</u></button>
+        <button class="icon-btn" title="Strikethrough Text" onclick="strikeSelection()"><s>S</s></button>
+      </div>
+      <textarea id="feedbackArea" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+      <div class="modal-actions">
+        <button class="small-btn small-save" onclick="saveFeedback()">Save</button>
+        <button class="small-btn small-cancel" onclick="closeFeedbackModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <!-- About / Info Modal -->
+  <div class="modal" id="infoModal">
+    <div class="modal-content">
+      <h3>Author Information</h3>
+      <div style="font-size:14px; line-height:1.6; white-space:pre-wrap;">👤 Developed by: Maqsudjon Polatov
+Creator of:
+• Pangeya Essay Platform
+• Uzglidex Marketplace
+• 37P.AI automated tools
+• NubAI medical assistant
+• Matsumi music project
+
+📌 Support development
+If you would like to support future updates and improvements,
+you can send a donation to the following card:
+
+💳 9860 6004 0548 1208
+
+Or pay via QR:</div>
+      <img src="donation_qr.png" alt="Donation QR Code" class="donation-qr" onerror="this.style.display='none'">
+      <p style="font-size:13px; margin-top:12px; color:var(--text-muted);">Press <strong>Ctrl + `</strong> again to close this window.</p>
+      <div class="modal-actions">
+        <button class="small-btn small-cancel" onclick="toggleInfoModal()">Close</button>
+      </div>
+    </div>
+  </div>
+  <!-- User Guide Modal -->
+  <div class="modal" id="guideModal">
+    <div class="modal-content">
+      <h3>User Guide</h3>
+      <h4 style="margin-top:10px; font-size:15px;">For Students</h4>
+      <p style="font-size:13px; margin-bottom:8px;">1. Enter your name in the <em>Your name</em> field.</p>
+      <p style="font-size:13px; margin-bottom:8px;">2. Write your essay in the <em>Write your essay</em> box.</p>
+      <p style="font-size:13px; margin-bottom:8px;">3. Click <strong>Submit</strong> to save your essay to the cloud.</p>
+      <p style="font-size:13px; margin-bottom:8px;">4. You can edit your essay by clicking the <strong>Edit</strong> button next to it.</p>
+      <p style="font-size:13px; margin-bottom:8px;">5. To download your essay as a PDF, click <strong>Download PDF</strong>.</p>
+      <h4 style="margin-top:14px; font-size:15px;">For Teachers</h4>
+      <p style="font-size:13px; margin-bottom:8px;">1. Enter the secret teacher key in the <em>Teacher Key</em> field and click <strong>Enter</strong> to access teacher mode.</p>
+      <p style="font-size:13px; margin-bottom:8px;">2. Once in teacher mode, you can edit any essay, highlight important sections, underline useful phrases, or strike through errors.</p>
+      <p style="font-size:13px; margin-bottom:8px;">3. You can also add or edit feedback by clicking <strong>Add/Edit Feedback</strong> next to an essay.</p>
+      <p style="font-size:13px; margin-bottom:8px;">4. The teacher key is confidential. If you need the key, please contact <strong>Maqsudjon Polatov</strong> personally to request it.</p>
+      <p style="font-size:13px; margin-bottom:8px;">Press <strong>Ctrl + ;</strong> again to close this window and return to the platform.</p>
+      <div class="modal-actions">
+        <button class="small-btn small-cancel" onclick="toggleGuideModal()">Close</button>
+      </div>
+    </div>
+  </div>
+  <!-- Include jsPDF from CDN for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Main application script; imported modules from Firebase remain unchanged.  Additional
+       functions implement the new Glass theme, New Year decorations and toggle logic. -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      doc,
+      updateDoc,
+      deleteDoc
+    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+    // Constants
+    const TEACHER_KEY = 'CTNLC';
+    let teacherMode = false;
+    let currentEditId = null;
+    let currentFeedbackId = null;
+
+    // Firebase configuration (copied from the original)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBnmbg7CyLki-M1E4rxPevJ741yTykliDA",
+      authDomain: "pangeya-essay.firebaseapp.com",
+      projectId: "pangeya-essay",
+      storageBucket: "pangeya-essay.appspot.com",
+      messagingSenderId: "783326121302",
+      appId: "1:783326121302:web:7d73c5110fb5682e5fdaf7",
+      measurementId: "G-0L1X6WHT1E"
+    };
+    // Initialize Firebase and Firestore
+    const app = initializeApp(firebaseConfig);
+    getAnalytics(app);
+    const db = getFirestore(app);
+    const essaysRef = collection(db, "essays");
+
+    /**
+     * Escape HTML special characters to prevent XSS when rendering content from
+     * Firestore.  Borrowed from the original site.
+     */
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    /**
+     * Render essays from Firestore into the list.  This function builds each
+     * essay card including word count and optional feedback.  Positioning is
+     * preserved from the original; we simply assign a class and rely on CSS for
+     * the New Year sticker on each card.
+     */
+    async function renderEssays() {
+      const container = document.getElementById('essaysList');
+      container.innerHTML = '';
+      const snapshot = await getDocs(essaysRef);
+      if (snapshot.empty) {
+        container.innerHTML =
+          '<div style="font-size:12px;color:var(--text-muted);padding:2px 2px 6px;">No essays yet. Write and submit your first essay!</div>';
+        return;
+      }
+      const docsArray = [];
+      snapshot.forEach(docSnap => {
+        docsArray.push({ id: docSnap.id, data: docSnap.data() });
+      });
+      const parseDateString = (str) => {
+        if (!str) return 0;
+        const parts = str.split(',');
+        const datePart = parts[0].trim();
+        const timePart = parts[1] ? parts[1].trim() : '';
+        let day, month, year;
+        if (datePart.includes('.')) {
+          [day, month, year] = datePart.split('.');
+        } else if (datePart.includes('/')) {
+          const dp = datePart.split('/');
+          if (parseInt(dp[0], 10) > 12) {
+            [day, month, year] = dp;
+          } else {
+            [month, day, year] = dp;
+          }
+        } else if (datePart.includes('-')) {
+          const dp = datePart.split('-');
+          if (dp[0].length === 4) {
+            [year, month, day] = dp;
+          } else {
+            [month, day, year] = dp;
+          }
+        } else {
+          return 0;
+        }
+        let hours = 0, minutes = 0, seconds = 0;
+        if (timePart) {
+          const tp = timePart.split(':');
+          hours = parseInt(tp[0], 10) || 0;
+          minutes = parseInt(tp[1], 10) || 0;
+          seconds = parseInt(tp[2], 10) || 0;
+        }
+        const y = parseInt(year, 10);
+        const m = parseInt(month, 10) - 1;
+        const d = parseInt(day, 10);
+        return new Date(y, m, d, hours, minutes, seconds).getTime();
+      };
+      docsArray.sort((a, b) => {
+        const tA = typeof a.data.timestamp === 'number' ? a.data.timestamp : parseDateString(a.data.date);
+        const tB = typeof b.data.timestamp === 'number' ? b.data.timestamp : parseDateString(b.data.date);
+        return tB - tA;
+      });
+      docsArray.forEach(item => {
+        const data = item.data;
+        const docId = item.id;
+        const card = document.createElement('div');
+        card.className = 'essay-card';
+        // Header with name and date
+        const header = document.createElement('div');
+        header.className = 'essay-header';
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'essay-name';
+        nameSpan.textContent = data.name || 'Unknown';
+        const dateSpan = document.createElement('span');
+        dateSpan.textContent = data.date || '';
+        header.appendChild(nameSpan);
+        header.appendChild(dateSpan);
+        // Essay text
+        const textDiv = document.createElement('div');
+        textDiv.className = 'essay-text';
+        textDiv.innerHTML = data.essay || '';
+        card.appendChild(header);
+        card.appendChild(textDiv);
+        // Word count
+        const rawText = textDiv.textContent || '';
+        const wordsArray = rawText.trim().split(/\s+/).filter(word => word.length > 0);
+        const wordCount = wordsArray.length;
+        const wordCountDiv = document.createElement('div');
+        wordCountDiv.className = 'word-count';
+        wordCountDiv.style.fontSize = '12px';
+        wordCountDiv.style.color = 'var(--text-muted)';
+        wordCountDiv.style.marginBottom = '4px';
+        wordCountDiv.textContent = `Word count: ${wordCount}`;
+        card.appendChild(wordCountDiv);
+        // Feedback block
+        if (data.feedback) {
+          const fb = document.createElement('div');
+          fb.className = 'feedback';
+          const lines = data.feedback.split('\n');
+          const formattedLines = lines.map(line => {
+            const trimmed = line.trim();
+            if (trimmed.startsWith('✔')) {
+              const content = trimmed.substring(1).trim();
+              return '<span class="fb-check">' + escapeHtml(content) + '</span>';
+            } else if (trimmed.startsWith('✘')) {
+              const content = trimmed.substring(1).trim();
+              return '<span class="fb-cross">' + escapeHtml(content) + '</span>';
+            }
+            return escapeHtml(line);
+          });
+          fb.innerHTML = '<strong>Teacher Feedback:</strong><br>' + formattedLines.join('<br>');
+          card.appendChild(fb);
+        }
+        // Action buttons
+        const actions = document.createElement('div');
+        actions.className = 'essay-actions';
+        const editBtn = document.createElement('button');
+        editBtn.className = 'chip-btn chip-edit';
+        editBtn.textContent = 'Edit';
+        editBtn.onclick = () => openEditModal(docId, data);
+        const delBtn = document.createElement('button');
+        delBtn.className = 'chip-btn chip-delete';
+        delBtn.textContent = 'Delete';
+        delBtn.onclick = () => deleteEssay(docId);
+        delBtn.style.display = teacherMode ? 'inline-block' : 'none';
+        const fbBtn = document.createElement('button');
+        fbBtn.className = 'chip-btn chip-feedback';
+        fbBtn.textContent = 'Add/Edit Feedback';
+        fbBtn.style.display = teacherMode ? 'inline-block' : 'none';
+        fbBtn.onclick = () => openFeedbackModal(docId, data);
+        actions.appendChild(editBtn);
+        actions.appendChild(delBtn);
+        actions.appendChild(fbBtn);
+        card.appendChild(actions);
+        // Card sticker element for New Year mode
+        const cardSticker = document.createElement('img');
+        cardSticker.src = 'assets/gift.png';
+        cardSticker.alt = 'Gift sticker';
+        cardSticker.className = 'card-sticker';
+        card.appendChild(cardSticker);
+        container.appendChild(card);
+      });
+    }
+
+    /** Submit a new essay to Firestore */
+    async function submitEssay() {
+      const nameInput = document.getElementById('name');
+      const essayInput = document.getElementById('essay');
+      const name = nameInput.value.trim();
+      const essay = essayInput.value.trim();
+      if (!essay) {
+        alert('Please write an essay before submitting.');
+        return;
+      }
+      await addDoc(essaysRef, {
+        name: name || 'Unknown',
+        essay: essay,
+        date: new Date().toLocaleString(),
+        timestamp: Date.now(),
+        feedback: ''
+      });
+      renderEssays();
+      essayInput.value = '';
+      nameInput.value = '';
+      alert('Essay saved to the cloud.');
+    }
+
+    // Edit modal handlers
+    function openEditModal(docId, data) {
+      currentEditId = docId;
+      const editArea = document.getElementById('editArea');
+      editArea.innerHTML = data.essay || '';
+      document.getElementById('editModal').style.display = 'flex';
+    }
+    function closeEditModal() {
+      document.getElementById('editModal').style.display = 'none';
+      currentEditId = null;
+    }
+    async function saveEdit() {
+      if (!currentEditId) return;
+      const updated = document.getElementById('editArea').innerHTML;
+      await updateDoc(doc(db, 'essays', currentEditId), { essay: updated });
+      renderEssays();
+      closeEditModal();
+    }
+
+    // Feedback modal handlers
+    function openFeedbackModal(docId, data) {
+      currentFeedbackId = docId;
+      document.getElementById('feedbackArea').value = data.feedback || '';
+      const essayDiv = document.getElementById('feedbackEssay');
+      essayDiv.innerHTML = data.essay || '';
+      document.getElementById('feedbackModal').style.display = 'flex';
+    }
+    function closeFeedbackModal() {
+      document.getElementById('feedbackModal').style.display = 'none';
+      currentFeedbackId = null;
+    }
+    async function saveFeedback() {
+      if (!currentFeedbackId) return;
+      const updated = document.getElementById('feedbackArea').value;
+      const essayUpdated = document.getElementById('feedbackEssay').innerHTML;
+      await updateDoc(doc(db, 'essays', currentFeedbackId), { feedback: updated, essay: essayUpdated });
+      renderEssays();
+      closeFeedbackModal();
+    }
+
+    /** Delete an essay */
+    async function deleteEssay(docId) {
+      if (!confirm('Delete this essay?')) return;
+      await deleteDoc(doc(db, 'essays', docId));
+      renderEssays();
+    }
+
+    // Rich text formatting commands for the edit and feedback modals
+    function findTagParent(node, tagNames, editableParent) {
+      while (node && node !== editableParent) {
+        if (node.nodeType === 1) {
+          const nodeName = node.nodeName.toLowerCase();
+          if (tagNames.includes(nodeName)) {
+            return node;
+          }
+          if (node.classList) {
+            if (tagNames.includes('mark') && node.classList.contains('user-highlight')) return node;
+            if (tagNames.includes('u') && node.classList.contains('underline-text')) return node;
+            if (tagNames.includes('s') && node.classList.contains('strike-text')) return node;
+          }
+        }
+        node = node.parentNode;
+      }
+      return null;
+    }
+    function getEditableParent(sel) {
+      if (!sel.rangeCount) return null;
+      const range = sel.getRangeAt(0);
+      let containerNode = range.commonAncestorContainer;
+      let editableParent = null;
+      if (containerNode.nodeType === 1) {
+        editableParent = containerNode.closest('[contenteditable="true"]');
+      } else {
+        editableParent = containerNode.parentElement ? containerNode.parentElement.closest('[contenteditable="true"]') : null;
+      }
+      if (!editableParent || (editableParent.id !== 'editArea' && editableParent.id !== 'feedbackEssay')) return null;
+      return editableParent;
+    }
+    function highlightSelection() {
+      const sel = window.getSelection();
+      const editableParent = getEditableParent(sel);
+      if (!editableParent) return;
+      editableParent.focus();
+      const selectedText = sel.toString();
+      if (!selectedText) return;
+      let markParent = findTagParent(sel.anchorNode, ['mark'], editableParent) || findTagParent(sel.focusNode, ['mark'], editableParent);
+      if (markParent) {
+        const text = markParent.textContent;
+        markParent.replaceWith(document.createTextNode(text));
+      } else {
+        const markHtml = `<mark>${selectedText}</mark>`;
+        document.execCommand('insertHTML', false, markHtml);
+      }
+    }
+    function underlineSelection() {
+      const sel = window.getSelection();
+      const editableParent = getEditableParent(sel);
+      if (!editableParent) return;
+      editableParent.focus();
+      const selectedText = sel.toString();
+      if (!selectedText) return;
+      let underlineParent = findTagParent(sel.anchorNode, ['u'], editableParent) || findTagParent(sel.focusNode, ['u'], editableParent);
+      if (underlineParent) {
+        const text = underlineParent.textContent;
+        underlineParent.replaceWith(document.createTextNode(text));
+      } else {
+        const uHtml = `<u>${selectedText}</u>`;
+        document.execCommand('insertHTML', false, uHtml);
+      }
+    }
+    function strikeSelection() {
+      const sel = window.getSelection();
+      const editableParent = getEditableParent(sel);
+      if (!editableParent) return;
+      editableParent.focus();
+      const selectedText = sel.toString();
+      if (!selectedText) return;
+      let strikeParent = findTagParent(sel.anchorNode, ['s'], editableParent) || findTagParent(sel.focusNode, ['s'], editableParent);
+      if (strikeParent) {
+        const text = strikeParent.textContent;
+        strikeParent.replaceWith(document.createTextNode(text));
+      } else {
+        const sHtml = `<s>${selectedText}</s>`;
+        document.execCommand('insertHTML', false, sHtml);
+      }
+    }
+
+    // Teacher panel toggling
+    function toggleTeacherPanel() {
+      const panel = document.getElementById('teacherPanel');
+      panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+    }
+    function enterTeacherMode() {
+      const key = document.getElementById('teacherKey').value.trim();
+      if (!key) {
+        alert('Enter teacher key.');
+        return;
+      }
+      if (key === TEACHER_KEY) {
+        teacherMode = true;
+        alert('Teacher mode enabled.');
+        document.getElementById('teacherKey').value = '';
+        document.getElementById('teacherPanel').style.display = 'none';
+        renderEssays();
+      } else {
+        alert('Wrong key.');
+      }
+    }
+
+    /**
+     * Theme switching – extended from the original to support a glass theme.  The
+     * Neon theme is treated as default when none of the other themes are
+     * specified.  Active button styling is updated accordingly.
+     */
+    function setTheme(theme) {
+      const body = document.body;
+      body.classList.remove('light-theme', 'dark-theme', 'glass-theme');
+      document.getElementById('neonTheme').classList.remove('active');
+      document.getElementById('lightTheme').classList.remove('active');
+      document.getElementById('darkTheme').classList.remove('active');
+      document.getElementById('glassTheme').classList.remove('active');
+      if (theme === 'light') {
+        body.classList.add('light-theme');
+        document.getElementById('lightTheme').classList.add('active');
+      } else if (theme === 'dark') {
+        body.classList.add('dark-theme');
+        document.getElementById('darkTheme').classList.add('active');
+      } else if (theme === 'glass') {
+        body.classList.add('glass-theme');
+        document.getElementById('glassTheme').classList.add('active');
+      } else {
+        document.getElementById('neonTheme').classList.add('active');
+      }
+    }
+
+    /**
+     * PDF download via jsPDF.  Retains the behaviour of the original site.
+     */
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const docPDF = new jsPDF({ unit: 'pt', format: 'a4' });
+      let name = document.getElementById('name').value.trim();
+      let essay = document.getElementById('essay').value.trim();
+      if (!name || !essay) {
+        const snapshot = await getDocs(essaysRef);
+        const docsList = snapshot.docs;
+        if (docsList.length) {
+          const last = docsList[docsList.length - 1].data();
+          if (!name) name = last.name || 'Unknown';
+          if (!essay) essay = last.essay || '';
+        }
+      }
+      if (!essay) {
+        alert('There is no essay text to export.');
+        return;
+      }
+      if (!name) name = 'Unknown';
+      docPDF.setFontSize(22);
+      docPDF.setTextColor(140, 0, 255);
+      docPDF.text('Pangeya Essay Report', 40, 50);
+      docPDF.setFontSize(12);
+      docPDF.setTextColor(0, 0, 0);
+      docPDF.text('Name: ' + name, 40, 90);
+      docPDF.text('Date: ' + new Date().toLocaleString(), 40, 110);
+      docPDF.setFontSize(14);
+      docPDF.setTextColor(30, 30, 30);
+      docPDF.text('Essay:', 40, 150);
+      const lines = docPDF.splitTextToSize(essay, 520);
+      docPDF.text(lines, 40, 180);
+      docPDF.save('pangeya-essay.pdf');
+    }
+
+    // Info and guide modals toggling
+    function toggleInfoModal() {
+      const infoModal = document.getElementById('infoModal');
+      if (!infoModal) return;
+      infoModal.style.display = infoModal.style.display === 'flex' ? 'none' : 'flex';
+    }
+    window.toggleInfoModal = toggleInfoModal;
+    function toggleGuideModal() {
+      const guideModal = document.getElementById('guideModal');
+      if (!guideModal) return;
+      guideModal.style.display = guideModal.style.display === 'flex' ? 'none' : 'flex';
+    }
+    window.toggleGuideModal = toggleGuideModal;
+
+    // Keyboard shortcuts to open modals
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === ';') {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleGuideModal();
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === '`') {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleInfoModal();
+        return;
+      }
+    });
+    // Close modals when clicking outside content
+    window.addEventListener('click', (e) => {
+      const editM = document.getElementById('editModal');
+      const fbM = document.getElementById('feedbackModal');
+      if (e.target === editM) closeEditModal();
+      if (e.target === fbM) closeFeedbackModal();
+      const infoM = document.getElementById('infoModal');
+      const guideM = document.getElementById('guideModal');
+      if (e.target === infoM) toggleInfoModal();
+      if (e.target === guideM) toggleGuideModal();
+    });
+
+    // Event listeners for main controls
+    document.getElementById('submitBtn').addEventListener('click', submitEssay);
+    document.getElementById('pdfBtn').addEventListener('click', downloadPDF);
+    document.getElementById('teacherToggle').addEventListener('click', toggleTeacherPanel);
+    document.getElementById('teacherEnter').addEventListener('click', enterTeacherMode);
+    document.getElementById('neonTheme').addEventListener('click', () => setTheme('neon'));
+    document.getElementById('lightTheme').addEventListener('click', () => setTheme('light'));
+    document.getElementById('darkTheme').addEventListener('click', () => setTheme('dark'));
+    document.getElementById('glassTheme').addEventListener('click', () => setTheme('glass'));
+
+    // New Year mode toggle
+    const nyToggle = document.getElementById('nyToggle');
+    nyToggle.addEventListener('click', () => {
+      document.body.classList.toggle('newyear-mode');
+      nyToggle.classList.toggle('active');
+    });
+
+    // Initial render
+    renderEssays();
+    // Expose modal functions for inline handlers
+    window.openEditModal = openEditModal;
+    window.closeEditModal = closeEditModal;
+    window.saveEdit = saveEdit;
+    window.openFeedbackModal = openFeedbackModal;
+    window.closeFeedbackModal = closeFeedbackModal;
+    window.saveFeedback = saveFeedback;
+    // Expose formatting functions
+    window.highlightSelection = highlightSelection;
+    window.underlineSelection = underlineSelection;
+    window.strikeSelection = strikeSelection;
+  </script>
+</body>
+</html>
